@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Custodios del Patrimonio - Olavarría Municipio</title>
+<style>
+  :root {
+    --primary: #0055c8;
+    --primary-light: #0066ff;
+    --primary-dark: #003b8e;
+    --bg-main: #f4f7fa;
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #cbd5e1;
+    --success: #10b981;
+    --danger: #ef4444;
+  }
+
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-main); color: var(--text-main); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+  
+  /* ENCABEZADO Y LOGO PERSONALIZADO */
+  .header-container {
+    width: 100%;
+    max-width: 1000px;
+    position: relative;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Contenedor del Logo Arriba a la Derecha */
+  .header-logo-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .header-logo-img {
+    height: 70px;
+    width: auto;
+    object-fit: contain;
+    display: none; /* Se muestra automáticamente si hay un logo subido */
+  }
+
+  /* Botón oculto/discreto para cambiar el logo */
+  .btn-config-logo {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1em;
+    opacity: 0.3;
+    transition: opacity 0.2s;
+    padding: 2px 6px;
+  }
+  .btn-config-logo:hover {
+    opacity: 1;
+  }
+
+  h1 { margin: 10px 0 4px 0; color: var(--primary); text-align: center; font-size: 2.2em; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; }
+  .subtitle { margin-top: 0; color: var(--text-muted); text-align: center; font-size: 1.05em; font-weight: 500; }
+  
+  .controls { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; justify-content: center; }
+  .btn-action { background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s; font-size: 0.9em; box-shadow: 0 2px 5px rgba(0,85,200,0.2); }
+  .btn-action:hover { background: var(--primary-dark); }
+  .btn-secondary { background: #3b82f6; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s; font-size: 0.9em; }
+  .btn-secondary:hover { background: #2563eb; }
+  .btn-danger { background: #dc2626; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s; font-size: 0.9em; }
+  .btn-danger:hover { background: #b91c1c; }
+
+  #file-input, #player-avatar-input, #boss-avatar-input, #header-logo-input { display: none; }
+
+  .game-container { display: flex; flex-direction: column; width: 100%; max-width: 1000px; gap: 20px; }
+  
+  .battlefield { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); border-radius: 12px; padding: 25px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+  .entity { display: flex; flex-direction: column; align-items: center; width: 45%; }
+  .entity h3 { margin: 8px 0; color: var(--primary-dark); }
+  
+  .avatar-wrapper { position: relative; display: flex; flex-direction: column; align-items: center; }
+  .avatar { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); margin-bottom: 8px; background: #e2e8f0; }
+  .btn-avatar-upload { background: #ffffff; color: var(--primary); border: 1px solid var(--primary); border-radius: 12px; padding: 4px 10px; font-size: 0.75em; font-weight: bold; cursor: pointer; transition: all 0.2s; margin-bottom: 8px; }
+  .btn-avatar-upload:hover { background: var(--primary); color: #ffffff; }
+
+  .hp-bar-bg { width: 100%; background: #e2e8f0; height: 20px; border-radius: 10px; overflow: hidden; border: 1px solid #cbd5e1; }
+  .hp-bar-fill { height: 100%; background: var(--success); width: 100%; transition: width 0.3s; }
+  .boss .hp-bar-fill { background: var(--danger); }
+
+  .hand { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
+  
+  .card-item { 
+    background: var(--card-bg); 
+    border: 2px solid var(--border-color); 
+    border-radius: 12px; 
+    width: 220px; 
+    padding: 12px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    position: relative; 
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .card-item:hover { transform: translateY(-5px); border-color: var(--primary-light); box-shadow: 0 8px 20px rgba(0,85,200,0.15); }
+  
+  .card-badge { position: absolute; top: 18px; right: 18px; background: var(--primary); color: #ffffff; font-size: 0.7em; padding: 3px 8px; border-radius: 10px; font-weight: bold; }
+  .card-img { width: 100%; height: 130px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; border: 1px solid #e2e8f0; }
+  .card-title { font-size: 1.1em; font-weight: bold; margin-bottom: 5px; text-align: center; color: var(--primary-dark); line-height: 1.2; }
+  .card-q { font-size: 0.85em; color: var(--text-muted); text-align: center; margin-bottom: 12px; height: 36px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  
+  .card-actions { display: flex; gap: 5px; width: 100%; margin-top: auto; }
+  .btn-play { flex: 2; background: var(--primary); color: #ffffff; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+  .btn-play:hover { background: var(--primary-dark); }
+  .btn-edit { flex: 1; background: #64748b; color: #fff; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.8em; }
+  .btn-edit:hover { background: #475569; }
+  .btn-del { background: #94a3b8; color: #fff; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.8em; }
+  .btn-del:hover { background: #64748b; }
+
+  .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(2px); justify-content: center; align-items: center; z-index: 100; }
+  .modal-content { background: var(--card-bg); padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; border: 1px solid var(--border-color); max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+  
+  .option-btn { display: block; width: 100%; padding: 12px; margin: 8px 0; background: #f8fafc; color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; text-align: left; cursor: pointer; font-size: 0.95em; font-weight: 500; transition: all 0.2s; }
+  .option-btn:hover { background: #eff6ff; border-color: var(--primary); color: var(--primary-dark); }
+
+  .form-group { margin-bottom: 12px; text-align: left; }
+  .form-group label { display: block; font-size: 0.85em; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
+  .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px; background: #f8fafc; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 4px; box-sizing: border-box; }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--primary); }
+
+  .log-box { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 12px; height: 100px; overflow-y: auto; font-family: monospace; font-size: 0.85em; color: #38bdf8; margin-top: 10px; }
+
+  @media (max-width: 650px) {
+    .header-logo-container { position: relative; margin-bottom: 10px; }
+    .header-logo-img { height: 50px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header-container">
+  <!-- MUESTRA EL LOGO CUANDO SE SUBE ALGUN ARCHIVO -->
+  <div class="header-logo-container">
+    <img id="header-logo-img" class="header-logo-img" alt="Logo Municipio">
+  </div>
+  
+  <div class="title-wrapper">
+    <h1>CUSTODIOS DEL PATRIMONIO</h1>
+    <!-- BOTÓN OCULTO/SUBTIL PARA SUBIR EL LOGO DE LA MUNICIPALIDAD -->
+    <button class="btn-config-logo" onclick="document.getElementById('header-logo-input').click()" title="Subir / Cambiar Logo de la Cabecera">⚙️</button>
+    <input type="file" id="header-logo-input" accept="image/*" onchange="uploadHeaderLogo(event)">
+  </div>
+  
+  <p class="subtitle">Olavarría Municipio - Edición y Juego</p>
+</header>
+
+<div class="controls">
+  <button class="btn-action" onclick="openEditModal()">+ Crear Carta</button>
+  <button class="btn-secondary" onclick="exportJSON()">💾 Guardar Mazo (JSON)</button>
+  <button class="btn-secondary" onclick="document.getElementById('file-input').click()">📂 Cargar Mazo (JSON)</button>
+  <button class="btn-danger" onclick="resetToDefault()">🔄 Mazo por Defecto</button>
+  <input type="file" id="file-input" accept=".json" onchange="importJSON(event)">
+</div>
+
+<div class="game-container">
+  <div class="battlefield">
+    <div class="entity player">
+      <div class="avatar-wrapper">
+        <img id="img-player" src="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=200" class="avatar" alt="Jugador">
+        <button class="btn-avatar-upload" onclick="document.getElementById('player-avatar-input').click()">📷 Cambiar Perfil</button>
+        <input type="file" id="player-avatar-input" accept="image/*" onchange="uploadAvatar('player', event)">
+      </div>
+      <h3>Jugador</h3>
+      <div class="hp-bar-bg"><div id="hp-player" class="hp-bar-fill"></div></div>
+      <span id="txt-player">100 / 100 HP</span>
+    </div>
+
+    <h2 style="color: var(--primary);">VS</h2>
+
+    <div class="entity boss">
+      <div class="avatar-wrapper">
+        <img id="img-boss" src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=200" class="avatar" alt="El Olvido">
+        <button class="btn-avatar-upload" onclick="document.getElementById('boss-avatar-input').click()">📷 Cambiar Perfil</button>
+        <input type="file" id="boss-avatar-input" accept="image/*" onchange="uploadAvatar('boss', event)">
+      </div>
+      <h3>El Olvido</h3>
+      <div class="hp-bar-bg"><div id="hp-boss" class="hp-bar-fill"></div></div>
+      <span id="txt-boss">100 / 100 HP</span>
+    </div>
+  </div>
+
+  <div class="hand" id="hand-container"></div>
+
+  <div class="log-box" id="log">
+    > ¡Bienvenido! Selecciona 'Jugar' en una carta para responder la trivia.
+  </div>
+</div>
+
+<div id="play-modal" class="modal">
+  <div class="modal-content">
+    <h3 id="modal-card-name" style="color: var(--primary); margin-top:0;"></h3>
+    <p id="modal-card-q" style="font-size: 1.1em; text-align:left; color: var(--text-main);"></p>
+    <div id="modal-options"></div>
+  </div>
+</div>
+
+<div id="edit-modal" class="modal">
+  <div class="modal-content">
+    <h3 id="edit-title" style="color: var(--primary); margin-top:0;">Editar Carta</h3>
+    <form id="card-form" onsubmit="saveCard(event)">
+      <input type="hidden" id="edit-id">
+      
+      <div class="form-group">
+        <label>Nombre del Lugar / Monumento</label>
+        <input type="text" id="edit-name" required>
+      </div>
+
+      <div class="form-group">
+        <label>Categoría</label>
+        <select id="edit-cat">
+          <option value="Patrimonio Cultural">Patrimonio Cultural</option>
+          <option value="Historia Local">Historia Local</option>
+          <option value="Geografía y Naturaleza">Geografía y Naturaleza</option>
+          <option value="Fiestas y Tradiciones">Fiestas y Tradiciones</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Imagen (URL web)</label>
+        <input type="text" id="edit-img" placeholder="https://...">
+      </div>
+
+      <div class="form-group">
+        <label>O Subir Imagen Local</label>
+        <input type="file" id="edit-img-file" accept="image/*" onchange="handleImageUpload(event)">
+      </div>
+
+      <div class="form-group">
+        <label>Pregunta de Trivia</label>
+        <textarea id="edit-q" rows="2" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Opción 1</label>
+        <input type="text" id="edit-op0" required>
+      </div>
+
+      <div class="form-group">
+        <label>Opción 2</label>
+        <input type="text" id="edit-op1" required>
+      </div>
+
+      <div class="form-group">
+        <label>Opción 3</label>
+        <input type="text" id="edit-op2" required>
+      </div>
+
+      <div class="form-group">
+        <label style="color:var(--primary); font-weight:bold;">¿Cuál es la opción correcta?</label>
+        <select id="edit-correct" style="border: 1px solid var(--primary);">
+          <option value="0">Opción 1</option>
+          <option value="1">Opción 2</option>
+          <option value="2">Opción 3</option>
+        </select>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:15px;">
+        <button type="submit" class="btn-action" style="flex:1;">Guardar Carta</button>
+        <button type="button" class="btn-danger" onclick="closeModal('edit-modal')">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const defaultCards = [
+  {
+    id: 1,
+    name: "Viejos Hornos de Cal",
+    cat: "Patrimonio Cultural",
+    img: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=600",
+    q: "¿Qué industria extractiva dio origen al desarrollo de la cal y canteras en Sierras Bayas?",
+    ops: ["Minería de Caliza", "Petróleo", "Siderurgia"],
+    a: 0
+  },
+  {
+    id: 2,
+    name: "Palacio Municipal",
+    cat: "Patrimonio Cultural",
+    img: "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?q=80&w=600",
+    q: "¿De qué estilo arquitectónico emblemático es la sede del gobierno local?",
+    ops: ["Neoclásico", "Gótico", "Art Déco"],
+    a: 0
+  },
+  {
+    id: 3,
+    name: "Fábricas Cementeras",
+    cat: "Patrimonio Cultural",
+    img: "https://images.unsplash.com/photo-1534567153574-2b12153a87f0?q=80&w=600",
+    q: "¿Qué material clave producido en Olavarría impulsó la construcción en el país?",
+    ops: ["Cemento Portland", "Acero", "Aluminio"],
+    a: 0
+  }
+];
+
+let cards = [];
+let playerHp = 100;
+let bossHp = 100;
+let uploadedImageData = "";
+
+function init() {
+  const local = localStorage.getItem('custodios_mazo');
+  if (local) {
+    try { cards = JSON.parse(local); } catch(e) { cards = [...defaultCards]; }
+  } else {
+    cards = [...defaultCards];
+  }
+
+  // Cargar Logo Guardado
+  const savedHeaderLogo = localStorage.getItem('custodios_header_logo');
+  if (savedHeaderLogo) {
+    const logoImg = document.getElementById('header-logo-img');
+    logoImg.src = savedHeaderLogo;
+    logoImg.style.display = 'block';
+  }
+
+  const savedPlayerImg = localStorage.getItem('custodios_avatar_player');
+  if (savedPlayerImg) document.getElementById('img-player').src = savedPlayerImg;
+
+  const savedBossImg = localStorage.getItem('custodios_avatar_boss');
+  if (savedBossImg) document.getElementById('img-boss').src = savedBossImg;
+
+  renderHand();
+  updateBars();
+}
+
+function uploadHeaderLogo(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    const dataUrl = evt.target.result;
+    const logoImg = document.getElementById('header-logo-img');
+    logoImg.src = dataUrl;
+    logoImg.style.display = 'block';
+    localStorage.setItem('custodios_header_logo', dataUrl);
+    log('🖼️ Logo de la cabecera actualizado.');
+  };
+  reader.readAsDataURL(file);
+}
+
+function uploadAvatar(type, e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    const dataUrl = evt.target.result;
+    if (type === 'player') {
+      document.getElementById('img-player').src = dataUrl;
+      localStorage.setItem('custodios_avatar_player', dataUrl);
+      log('📷 Imagen de perfil del Jugador actualizada.');
+    } else if (type === 'boss') {
+      document.getElementById('img-boss').src = dataUrl;
+      localStorage.setItem('custodios_avatar_boss', dataUrl);
+      log('📷 Imagen de perfil de El Olvido actualizada.');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveStorageCards() {
+  localStorage.setItem('custodios_mazo', JSON.stringify(cards));
+}
+
+function renderHand() {
+  const container = document.getElementById('hand-container');
+  container.innerHTML = '';
+
+  cards.forEach(card => {
+    const el = document.createElement('div');
+    el.className = 'card-item';
+    el.innerHTML = `
+      <span class="card-badge">${card.cat}</span>
+      <img src="${card.img}" class="card-img" alt="${card.name}" onerror="this.src='https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=600'">
+      <div class="card-title">${card.name}</div>
+      <div class="card-q">${card.q}</div>
+      <div class="card-actions">
+        <button class="btn-play" onclick="openPlayModal(${card.id})">Jugar</button>
+        <button class="btn-edit" onclick="openEditModal(${card.id})">✏️</button>
+        <button class="btn-del" onclick="deleteCard(${card.id})">🗑️</button>
+      </div>
+    `;
+    container.appendChild(el);
+  });
+}
+
+function openPlayModal(cardId) {
+  const card = cards.find(c => c.id === cardId);
+  if (!card) return;
+
+  document.getElementById('modal-card-name').innerText = card.name;
+  document.getElementById('modal-card-q').innerText = card.q;
+
+  const opsContainer = document.getElementById('modal-options');
+  opsContainer.innerHTML = '';
+
+  let options = card.ops.map((opt, idx) => ({ text: opt, isCorrect: idx === card.a }));
+  options.sort(() => Math.random() - 0.5);
+
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerText = opt.text;
+    btn.onclick = () => playCard(card, opt.isCorrect);
+    opsContainer.appendChild(btn);
+  });
+
+  document.getElementById('play-modal').style.display = 'flex';
+}
+
+function playCard(card, isCorrect) {
+  closeModal('play-modal');
+
+  if (isCorrect) {
+    showFeedback('¡CORRECTO! Has protegido el patrimonio.', '#10b981');
+    const damage = 25;
+    bossHp = Math.max(0, bossHp - damage);
+    log(`✅ ¡Respuesta correcta sobre "${card.name}"! Causaste ${damage} de daño al Olvido.`);
+  } else {
+    showFeedback('❌ INCORRECTO. El Olvido del Tiempo avanza.', '#ef4444');
+    const damage = 15;
+    playerHp = Math.max(0, playerHp - damage);
+    log(`❌ Respuesta incorrecta sobre "${card.name}". Recibiste ${damage} de daño.`);
+  }
+
+  updateBars();
+  checkGameOver();
+}
+
+function showFeedback(message, bgColor) {
+  const feedbackEl = document.createElement('div');
+  feedbackEl.innerText = message;
+  feedbackEl.style.position = 'fixed';
+  feedbackEl.style.top = '20px';
+  feedbackEl.style.left = '50%';
+  feedbackEl.style.transform = 'translateX(-50%)';
+  feedbackEl.style.backgroundColor = bgColor;
+  feedbackEl.style.color = '#ffffff';
+  feedbackEl.style.padding = '15px 30px';
+  feedbackEl.style.borderRadius = '8px';
+  feedbackEl.style.fontSize = '1.2em';
+  feedbackEl.style.fontWeight = 'bold';
+  feedbackEl.style.boxShadow = '0 4px 15px rgba(0,0,0,0.15)';
+  feedbackEl.style.zIndex = '9999';
+  feedbackEl.style.transition = 'opacity 0.5s ease';
+
+  document.body.appendChild(feedbackEl);
+
+  setTimeout(() => {
+    feedbackEl.style.opacity = '0';
+    setTimeout(() => {
+      feedbackEl.remove();
+    }, 500);
+  }, 2000);
+}
+
+function openEditModal(cardId = null) {
+  uploadedImageData = "";
+  document.getElementById('edit-img-file').value = "";
+  
+  if (cardId) {
+    const card = cards.find(c => c.id === cardId);
+    document.getElementById('edit-title').innerText = "Editar Carta";
+    document.getElementById('edit-id').value = card.id;
+    document.getElementById('edit-name').value = card.name;
+    document.getElementById('edit-cat').value = card.cat;
+    document.getElementById('edit-img').value = card.img.startsWith('data:') ? '' : card.img;
+    document.getElementById('edit-q').value = card.q;
+    document.getElementById('edit-op0').value = card.ops[0] || '';
+    document.getElementById('edit-op1').value = card.ops[1] || '';
+    document.getElementById('edit-op2').value = card.ops[2] || '';
+    document.getElementById('edit-correct').value = card.a !== undefined ? card.a : 0;
+  } else {
+    document.getElementById('edit-title').innerText = "Crear Nueva Carta";
+    document.getElementById('edit-id').value = "";
+    document.getElementById('card-form').reset();
+    document.getElementById('edit-correct').value = "0";
+  }
+
+  document.getElementById('edit-modal').style.display = 'flex';
+}
+
+function handleImageUpload(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      uploadedImageData = evt.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function saveCard(e) {
+  e.preventDefault();
+  const id = document.getElementById('edit-id').value;
+  let finalImg = uploadedImageData || document.getElementById('edit-img').value;
+
+  if (!finalImg && id) {
+    const existing = cards.find(c => c.id === parseInt(id));
+    if (existing) finalImg = existing.img;
+  }
+
+  const newCard = {
+    id: id ? parseInt(id) : Date.now(),
+    name: document.getElementById('edit-name').value,
+    cat: document.getElementById('edit-cat').value,
+    img: finalImg || 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=600',
+    q: document.getElementById('edit-q').value,
+    ops: [
+      document.getElementById('edit-op0').value,
+      document.getElementById('edit-op1').value,
+      document.getElementById('edit-op2').value
+    ],
+    a: parseInt(document.getElementById('edit-correct').value)
+  };
+
+  if (id) {
+    const index = cards.findIndex(c => c.id === parseInt(id));
+    cards[index] = newCard;
+  } else {
+    cards.push(newCard);
+  }
+
+  saveStorageCards();
+  closeModal('edit-modal');
+  renderHand();
+}
+
+function deleteCard(id) {
+  if (confirm("¿Estás seguro de eliminar esta carta?")) {
+    cards = cards.filter(c => c.id !== id);
+    saveStorageCards();
+    renderHand();
+  }
+}
+
+function closeModal(modalId) {
+  document.getElementById(modalId).style.display = 'none';
+}
+
+function updateBars() {
+  document.getElementById('hp-player').style.width = playerHp + '%';
+  document.getElementById('txt-player').innerText = `${playerHp} / 100 HP`;
+
+  document.getElementById('hp-boss').style.width = bossHp + '%';
+  document.getElementById('txt-boss').innerText = `${bossHp} / 100 HP`;
+}
+
+function log(msg) {
+  const logBox = document.getElementById('log');
+  logBox.innerHTML = `> ${msg}<br>` + logBox.innerHTML;
+}
+
+function checkGameOver() {
+  if (bossHp <= 0) {
+    alert("🎉 ¡Felicidades! Has derrotado al Olvido y preservado el patrimonio de Olavarría.");
+  } else if (playerHp <= 0) {
+    alert("💀 El Olvido ha triunfado. Inténtalo de nuevo.");
+  }
+}
+
+function exportJSON() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cards, null, 2));
+  const downloadAnchor = document.createElement('a');
+  downloadAnchor.setAttribute("href", dataStr);
+  downloadAnchor.setAttribute("download", "mazo_patrimonio.json");
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  downloadAnchor.remove();
+}
+
+function importJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    try {
+      const imported = JSON.parse(evt.target.result);
+      if (Array.isArray(imported)) {
+        cards = imported;
+        saveStorageCards();
+        renderHand();
+        alert("¡Mazo cargado con éxito!");
+      } else {
+        alert("El archivo JSON no tiene el formato correcto.");
+      }
+    } catch(err) {
+      alert("Error al leer el archivo JSON.");
+    }
+  };
+  reader.readAsText(file);
+}
+
+function resetToDefault() {
+  if (confirm("¿Restablecer el mazo original por defecto?")) {
+    cards = [...defaultCards];
+    saveStorageCards();
+    localStorage.removeItem('custodios_avatar_player');
+    localStorage.removeItem('custodios_avatar_boss');
+    localStorage.removeItem('custodios_header_logo');
+    document.getElementById('header-logo-img').style.display = 'none';
+    document.getElementById('img-player').src = "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=200";
+    document.getElementById('img-boss').src = "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=200";
+    renderHand();
+  }
+}
+
+init();
+</script>
+</body>
+</html>
